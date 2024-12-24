@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Rewards</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #eef2f3;
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+        }
+        .reward-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .support-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        .support-icon img {
+            width: 35px;
+            height: 35px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Earn Rewards by Watching Ads!</h2>
+    <p>Click the buttons below to watch ads and earn rewards.</p>
+    <div>
+        <button id="adButton1" class="btn btn-primary">Show Ad 1</button>
+        <button id="adButton2" class="btn btn-success">Show Ad 2</button>
+    </div>
+    <div class="reward-box">
+        <h4>Your Total Rewards:</h4>
+        <p id="rewardCount" class="fs-5">0 Points</p>
+    </div>
+    <button id="withdrawButton" class="btn btn-warning mt-4">Withdraw</button>
+</div>
+
+<div class="support-icon" onclick="openSupport()">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/telegram-app.png" alt="Support">
+</div>
+
+<!-- Monetag Script -->
+<script src="//niphaumeenses.net/vignette.min.js" data-zone="8693847" data-sdk="show_8693847"></script>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    // Initialize rewards from localStorage
+    let totalRewards = localStorage.getItem('userRewards') 
+        ? parseInt(localStorage.getItem('userRewards')) 
+        : 0;
+    document.getElementById('rewardCount').innerText = `${totalRewards} Points`;
+
+    // Function to open Telegram Support
+    function openSupport() {
+        window.open('https://t.me/Ads_master_support', '_blank');
+    }
+
+    // Show ad function with delayed reward
+    function showAd(adId) {
+        show_8693847().then(() => {
+            toastr.info('Please wait 15 seconds for your reward.', 'Ad Watched');
+            setTimeout(() => {
+                totalRewards += 10;
+                localStorage.setItem('userRewards', totalRewards);
+                document.getElementById('rewardCount').innerText = `${totalRewards} Points`;
+                toastr.success(`You've earned 10 points from ${adId}!`, 'Success');
+            }, 15000);
+        }).catch(error => {
+            toastr.error('Failed to load the ad. Please try again.', 'Error');
+            console.error(error);
+        });
+    }
+
+    // Event Listeners for Ad Buttons
+    document.getElementById('adButton1').addEventListener('click', () => showAd('Ad 1'));
+    document.getElementById('adButton2').addEventListener('click', () => showAd('Ad 2'));
+
+    // Withdraw Button Logic
+    document.getElementById('withdrawButton').addEventListener('click', () => {
+        if (totalRewards < 1000) {
+            toastr.warning('You need at least 1000 points to withdraw.', 'Insufficient Points');
+            return;
+        }
+
+        // Create a Withdraw Form
+        const method = prompt('Enter withdraw method (Bkash/Nagad):');
+        const number = prompt('Enter your Bkash/Nagad number:');
+        const amount = parseInt(prompt('Enter amount to withdraw (minimum 1000):'));
+
+        if (method && number && amount && amount <= totalRewards) {
+            totalRewards -= amount;
+            localStorage.setItem('userRewards', totalRewards);
+            document.getElementById('rewardCount').innerText = `${totalRewards} Points`;
+
+            // Send withdraw request to Telegram
+            window.open(`https://t.me/Ads_master_support?start=withdraw_request\nMethod: ${method}\nNumber: ${number}\nAmount: ${amount}`, '_blank');
+            toastr.success('Withdraw request sent successfully!', 'Request Sent');
+        } else {
+            toastr.error('Invalid details. Please try again.', 'Error');
+        }
+    });
+</script>
+
+</body>
+</html>
